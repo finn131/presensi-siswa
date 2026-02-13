@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { absensiAPI } from '../services/api'
 import Table from '../components/Table'
-import LoadingSpinner from '../components/LoadingSpinner'
 
 export default function Rekap() {
   const [data, setData] = useState([])
@@ -37,44 +36,47 @@ export default function Rekap() {
     kelas: r.siswa.kelas,
     waktu: new Date(r.waktu_masuk).toLocaleTimeString('id-ID'),
     status: (
-      <span className={`px-2 py-1 rounded text-xs font-medium ${
-        r.status === 'Hadir' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
-      }`}>
+      <span className={r.status === 'Hadir' ? 'badge-success' : 'badge-warning'}>
         {r.status}
       </span>
     ),
   }))
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-800">Rekap Absensi</h1>
+    <div className="space-y-6 animate__animated animate__fadeIn">
+      <div>
+        <h1 className="page-title">Rekap Absensi</h1>
+        <p className="page-subtitle">Filter data kehadiran berdasarkan rentang tanggal.</p>
+      </div>
 
-      <div className="card">
-        <form onSubmit={handleFilter} className="flex gap-4 flex-wrap">
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg"
-          />
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg"
-          />
+      <div className="card panel-smooth">
+        <form onSubmit={handleFilter} className="flex gap-3 flex-wrap items-end">
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 mb-1">Mulai</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="input-field"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 mb-1">Sampai</label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="input-field"
+            />
+          </div>
           <button type="submit" className="btn-primary">
             Filter
           </button>
         </form>
       </div>
 
-      <div className="card">
-        <Table
-          headers={['Tanggal', 'NIS', 'Nama', 'Kelas', 'Waktu', 'Status']}
-          rows={rows}
-          loading={loading}
-        />
+      <div className="card panel-smooth">
+        <Table headers={['Tanggal', 'NIS', 'Nama', 'Kelas', 'Waktu', 'Status']} rows={rows} loading={loading} />
       </div>
     </div>
   )

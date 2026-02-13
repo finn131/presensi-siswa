@@ -12,14 +12,23 @@ const api = axios.create({
 
 // Auth endpoints
 export const authAPI = {
-  login: (username, password) => api.post('/auth/login', { username, password }),
+  login: (username, password, captchaAnswer) =>
+    api.post('/auth/login', { username, password, captcha_answer: captchaAnswer }),
+  getCaptcha: () => api.get('/auth/captcha'),
   logout: () => api.post('/auth/logout'),
   getCurrentUser: () => api.get('/auth/me'),
 }
 
 // Absensi endpoints
 export const absensiAPI = {
-  scan: (uid) => api.post('/absensi/scan', { uid }),
+  scan: (uid) => {
+    const now = new Date()
+    return api.post('/absensi/scan', {
+      uid,
+      scanned_at: now.toISOString(),
+      timezone_offset_minutes: now.getTimezoneOffset(),
+    })
+  },
   getToday: () => api.get('/absensi/today'),
   getStats: (tanggal) => api.get('/absensi/stats', { params: { tanggal } }),
   getReport: (start_date, end_date, siswa_id) => 

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { siswaAPI } from '../services/api'
 import Table from '../components/Table'
-import LoadingSpinner from '../components/LoadingSpinner'
 
 export default function DataSiswa() {
   const [students, setStudents] = useState([])
@@ -33,40 +32,31 @@ export default function DataSiswa() {
   }))
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-800">Data Siswa</h1>
+    <div className="space-y-6 animate__animated animate__fadeIn">
+      <div>
+        <h1 className="page-title">Data Siswa</h1>
+        <p className="page-subtitle">Lihat data identitas siswa dan status kartu RFID yang terdaftar.</p>
+      </div>
 
-      <div className="card">
-        <div className="flex gap-2">
+      <div className="card panel-smooth">
+        <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => setFilter('aktif')}
-            className={`px-4 py-2 rounded-lg transition ${
-              filter === 'aktif'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+            className={filter === 'aktif' ? 'btn-primary' : 'btn-secondary'}
           >
-            Aktif
+            Siswa Aktif
           </button>
           <button
             onClick={() => setFilter('tidak_aktif')}
-            className={`px-4 py-2 rounded-lg transition ${
-              filter === 'tidak_aktif'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+            className={filter === 'tidak_aktif' ? 'btn-primary' : 'btn-secondary'}
           >
-            Tidak Aktif
+            Siswa Tidak Aktif
           </button>
         </div>
       </div>
 
-      <div className="card">
-        <Table
-          headers={['NIS', 'Nama', 'Kelas', 'Jenis Kelamin', 'RFID']}
-          rows={rows}
-          loading={loading}
-        />
+      <div className="card panel-smooth">
+        <Table headers={['NIS', 'Nama', 'Kelas', 'Jenis Kelamin', 'RFID']} rows={rows} loading={loading} />
       </div>
     </div>
   )

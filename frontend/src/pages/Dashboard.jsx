@@ -13,14 +13,13 @@ export default function Dashboard() {
   useEffect(() => {
     loadStats()
     loadRecent()
-    
-    // Connect to Socket.IO
+
     const socket = io()
     socket.on('scan', (data) => {
       setRecent((prev) => [data, ...prev.slice(0, 7)])
       loadStats()
     })
-    
+
     return () => socket.disconnect()
   }, [])
 
@@ -55,32 +54,34 @@ export default function Dashboard() {
     nama: r.siswa.nama,
     kelas: r.siswa.kelas,
     status: (
-      <span className={`px-2 py-1 rounded text-xs font-medium ${
-        r.status === 'Hadir' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
-      }`}>
+      <span className={r.status === 'Hadir' ? 'badge-success' : 'badge-warning'}>
         {r.status}
       </span>
     ),
   }))
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card title="Total Siswa" value={stats.total_siswa} />
-        <Card title="Hadir" value={stats.total_hadir} />
-        <Card title="Terlambat" value={stats.total_terlambat} />
-        <Card title="Tidak Hadir" value={stats.total_tidak_hadir} />
+    <div className="space-y-6 animate__animated animate__fadeIn">
+      <div>
+        <h1 className="page-title">Dashboard</h1>
+        <p className="page-subtitle">Ringkasan kehadiran siswa hari ini secara real-time.</p>
       </div>
 
-      <div className="card">
-        <h2 className="text-xl font-semibold mb-4">Absensi Hari Ini</h2>
-        <Table
-          headers={['Waktu', 'NIS', 'Nama', 'Kelas', 'Status']}
-          rows={recentRows}
-          loading={loading}
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <Card title="Total Siswa" value={stats.total_siswa} tone="cyan" />
+        <Card title="Hadir" value={stats.total_hadir} tone="emerald" />
+        <Card title="Terlambat" value={stats.total_terlambat} tone="amber" />
+        <Card title="Tidak Hadir" value={stats.total_tidak_hadir} tone="rose" />
+      </div>
+
+      <div className="card panel-smooth">
+        <div className="flex items-center justify-between mb-4 gap-3">
+          <h2 className="text-xl font-bold text-slate-900">Absensi Hari Ini</h2>
+          <button onClick={loadRecent} className="btn-secondary text-sm">
+            Refresh
+          </button>
+        </div>
+        <Table headers={['Waktu', 'NIS', 'Nama', 'Kelas', 'Status']} rows={recentRows} loading={loading} />
       </div>
     </div>
   )

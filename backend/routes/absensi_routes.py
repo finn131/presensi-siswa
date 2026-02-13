@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from flask_login import login_required, current_user
-from datetime import datetime, date
+from datetime import datetime, timedelta
 from models import db, Siswa, Absensi, RFIDCard
 from services.absensi_service import AbsensiService, RFIDService
 from utils.response import success_response, error_response, require_role
@@ -9,11 +9,36 @@ from utils.helpers import format_datetime, format_date
 absensi_bp = Blueprint('absensi', __name__, url_prefix='/api/absensi')
 
 
+def _parse_scan_time_from_client(scanned_at, timezone_offset_minutes):
+    """Parse client scan time and convert to client local naive datetime."""
+    if not scanned_at:
+        return None
+
+    try:
+        # Accept ISO-8601 from browser, including trailing Z.
+        parsed = datetime.fromisoformat(scanned_at.replace('Z', '+00:00'))
+    except ValueError:
+        return None
+
+    if timezone_offset_minutes is None:
+        return parsed.replace(tzinfo=None) if parsed.tzinfo else parsed
+
+    try:
+        offset_minutes = int(timezone_offset_minutes)
+    except (TypeError, ValueError):
+        return parsed.replace(tzinfo=None) if parsed.tzinfo else parsed
+
+    # JS getTimezoneOffset: UTC = local + offset, so local = UTC - offset
+    return (parsed - timedelta(minutes=offset_minutes)).replace(tzinfo=None)
+
+
 @absensi_bp.route('/scan', methods=['POST'])
 def scan_rfid():
     """RFID scan endpoint - records attendance"""
     data = request.get_json() or {}
     uid = data.get('uid')
+    scanned_at = data.get('scanned_at')
+    timezone_offset_minutes = data.get('timezone_offset_minutes')
     
     if not uid:
         return error_response('UID required', 400)
@@ -27,8 +52,10 @@ def scan_rfid():
     if siswa.status != 'aktif':
         return error_response('Siswa tidak aktif', 400)
     
+    scan_time = _parse_scan_time_from_client(scanned_at, timezone_offset_minutes)
+
     # Record attendance
-    absensi, msg = AbsensiService.record_attendance(siswa.id, uid)
+    absensi, msg = AbsensiService.record_attendance(siswa.id, uid, scan_time=scan_time)
     
     if not absensi:
         return error_response(msg, 409)

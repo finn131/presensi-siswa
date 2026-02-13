@@ -8,6 +8,7 @@ class Absensi(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     siswa_id = db.Column(db.Integer, db.ForeignKey('siswa.id'), nullable=False)
+    nama_siswa = db.Column(db.String(120), nullable=True)
     rfid_uid = db.Column(db.String(100), nullable=True)
     waktu_masuk = db.Column(db.DateTime, default=datetime.utcnow)
     waktu_keluar = db.Column(db.DateTime, nullable=True)

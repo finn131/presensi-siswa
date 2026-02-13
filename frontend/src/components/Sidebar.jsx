@@ -1,32 +1,44 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
+const menus = [
+  { to: '/dashboard', label: 'Dashboard', icon: 'Stats' },
+  { to: '/scan', label: 'Scan RFID', icon: 'Scan' },
+  { to: '/data-siswa', label: 'Data Siswa', icon: 'Data' },
+  { to: '/rekap', label: 'Rekap Absensi', icon: 'Report' },
+]
+
 export default function Sidebar() {
   const location = useLocation()
   const { user } = useAuth()
-  
-  const isActive = (path) => location.pathname === path ? 'bg-blue-600 text-white' : 'hover:bg-white/40'
+
+  const linkClass = (path) => {
+    const active = location.pathname === path
+    return [
+      'menu-link',
+      active
+        ? 'menu-link-active'
+        : 'text-slate-700 hover:bg-white/85 hover:shadow-md hover:shadow-slate-200/70',
+    ].join(' ')
+  }
 
   return (
-    <aside className="hidden md:block w-64 bg-gradient-to-b from-slate-100 to-slate-50 p-6">
-      <div className="glass p-4 mb-6">
-        <h2 className="text-xl font-semibold text-gray-800">Sistem Presensi</h2>
-        <p className="text-xs text-gray-600 mt-1">{user?.role}</p>
+    <aside className="hidden md:block w-72 p-5 lg:p-6">
+      <div className="glass panel-smooth p-5 mb-4">
+        <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Sistem</p>
+        <h2 className="text-xl font-bold text-slate-900 mt-2">Panel Presensi</h2>
+        <p className="text-xs text-slate-600 mt-1">Role: {user?.role}</p>
       </div>
-      
-      <nav className="space-y-2">
-        <Link to="/dashboard" className={`block px-4 py-3 rounded-lg transition ${isActive('/dashboard')}`}>
-          📊 Dashboard
-        </Link>
-        <Link to="/scan" className={`block px-4 py-3 rounded-lg transition ${isActive('/scan')}`}>
-          📱 Scan RFID
-        </Link>
-        <Link to="/data-siswa" className={`block px-4 py-3 rounded-lg transition ${isActive('/data-siswa')}`}>
-          👥 Data Siswa
-        </Link>
-        <Link to="/rekap" className={`block px-4 py-3 rounded-lg transition ${isActive('/rekap')}`}>
-          📈 Rekap Absensi
-        </Link>
+
+      <nav className="glass panel-smooth p-3 space-y-1">
+        {menus.map((menu) => (
+          <Link key={menu.to} to={menu.to} className={linkClass(menu.to)}>
+            <span className="inline-block min-w-[52px] text-xs uppercase tracking-wide opacity-80">
+              {menu.icon}
+            </span>
+            <span>{menu.label}</span>
+          </Link>
+        ))}
       </nav>
     </aside>
   )

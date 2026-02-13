@@ -2,6 +2,7 @@ import os
 from flask import Flask
 from flask_login import LoginManager
 from flask_socketio import SocketIO
+from sqlalchemy import inspect, text
 from config import config
 from models import db, User
 from routes.auth_routes import auth_bp
@@ -21,6 +22,14 @@ def create_app(config_name=None):
     
     # Initialize extensions
     db.init_app(app)
+
+    with app.app_context():
+        inspector = inspect(db.engine)
+        if 'absensi' in inspector.get_table_names():
+            absensi_columns = {col['name'] for col in inspector.get_columns('absensi')}
+            if 'nama_siswa' not in absensi_columns:
+                db.session.execute(text('ALTER TABLE absensi ADD COLUMN nama_siswa VARCHAR(120)'))
+                db.session.commit()
     
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
@@ -52,10 +61,10 @@ def create_app(config_name=None):
                 'laporan': '/api/laporan'
                 }
             }, 200
-    
-        @app.route('/health')
-        def health():
-            return {'status': 'ok'}, 200
+
+    @app.route('/health')
+    def health():
+        return {'status': 'ok'}, 200
     
     # Context processor to make socketio available in templates
     @app.context_processor
@@ -76,4 +85,11 @@ def create_app(config_name=None):
 
 if __name__ == '__main__':
     app, socketio = create_app()
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    socketio.run(
+        app,
+        host='0.0.0.0',
+        port=port,
+        debug=app.config.get('DEBUG', False),
+        allow_unsafe_werkzeug=True
+    )

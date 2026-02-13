@@ -31,7 +31,7 @@ python init_db.py
 Sample data:
 - Admin: `admin` / `admin`
 - Petugas: `petugas` / `petugas`
-- 5 sample students dengan RFID UIDs
+- 32 sample students dengan RFID UIDs
 
 ### 5. Run Server
 ```bash
@@ -65,7 +65,6 @@ Server akan berjalan di `http://localhost:5000`
 - `GET /api/laporan/export/csv` - Export CSV
 
 ## Test RFID Scan
-
 ```bash
 curl -X POST http://localhost:5000/api/absensi/scan \
   -H "Content-Type: application/json" \

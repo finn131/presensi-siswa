@@ -51,9 +51,10 @@ class AbsensiService:
         ).first()
     
     @staticmethod
-    def record_attendance(siswa_id, rfid_uid=None):
+    def record_attendance(siswa_id, rfid_uid=None, scan_time=None):
         """Record student attendance"""
-        today = date.today()
+        now = scan_time or datetime.now()
+        today = now.date()
         
         # Check if already attended
         existing = AbsensiService.check_attendance(siswa_id, today)
@@ -61,12 +62,14 @@ class AbsensiService:
             return None, 'Sudah Absen'
         
         # Determine status
-        now = datetime.now()
         status = get_attendance_status(now.time())
+        siswa = Siswa.query.get(siswa_id)
+        nama_siswa = siswa.nama if siswa else None
         
         # Create attendance record
         absensi = Absensi(
             siswa_id=siswa_id,
+            nama_siswa=nama_siswa,
             rfid_uid=rfid_uid,
             waktu_masuk=now,
             status=status,

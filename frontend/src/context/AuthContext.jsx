@@ -7,10 +7,10 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  const login = useCallback(async (username, password) => {
+  const login = useCallback(async (username, password, captchaAnswer) => {
     setLoading(true)
     try {
-      const response = await authAPI.login(username, password)
+      const response = await authAPI.login(username, password, captchaAnswer)
       if (response.data.success) {
         setUser(response.data.data.user)
         localStorage.setItem('user', JSON.stringify(response.data.data.user))

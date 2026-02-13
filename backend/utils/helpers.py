@@ -13,7 +13,8 @@ def get_attendance_status(current_time=None):
     cutoff_hour, cutoff_minute = Config.RFID_CUTOFF_TIME
     cutoff_time = time(cutoff_hour, cutoff_minute)
     
-    return 'Hadir' if current_time <= cutoff_time else 'Terlambat'
+    # Rule: sebelum cutoff = Hadir, jam cutoff dan setelahnya = Terlambat
+    return 'Hadir' if current_time < cutoff_time else 'Terlambat'
 
 
 def format_datetime(dt):

@@ -1,192 +1,160 @@
-# Sistem Presensi Siswa dengan RFID
+# Sistem Presensi Siswa (RFID)
 
-Aplikasi web lengkap untuk manajemen presensi siswa menggunakan kartu RFID, dibangun dengan Flask (Backend) dan React (Frontend).
+Aplikasi presensi siswa berbasis RFID dengan backend Flask dan frontend React (Vite).
 
-## 📋 Fitur
+## Fitur Utama
+- Login multi-user (`admin` / `petugas`) + CAPTCHA gambar
+- Scan RFID untuk mencatat absensi harian
+- Statistik dan tabel absensi harian
+- Rekap absensi dengan filter tanggal
+- Manajemen data siswa dan kartu RFID
+- Penyimpanan `nama_siswa` langsung di tabel `absensi`
+- Seed data bawaan: 32 siswa + UID RFID
 
-### Backend (Flask)
-- ✅ Login multi-user (Admin/Petugas) dengan hashed password
-- ✅ Integrasi RFID - endpoint `/api/absensi/scan` menerima UID
-- ✅ Realtime update menggunakan Flask-SocketIO
-- ✅ Database SQLite dengan SQLAlchemy ORM
-- ✅ RESTful API dengan role-based access control
-- ✅ Export CSV untuk laporan absensi
-- ✅ Modular architecture (models, routes, services, utils)
+## Struktur Project
 
-### Frontend (React + Vite)
-- ✅ UI modern dengan Tailwind CSS dan glassmorphism design
-- ✅ Smooth animations menggunakan Animate.css
-- ✅ Dashboard dengan real-time stats
-- ✅ Halaman scan RFID dengan feedback
-- ✅ Manajemen data siswa
-- ✅ Rekap absensi dengan filter tanggal
-- ✅ Responsive sidebar navigation
-- ✅ Toast notifications
-- ✅ Auth context dan custom hooks
+```text
+absensi-siswa/
+├── docker-compose.yml
+├── README.md
+├── backend/
+│   ├── app.py
+│   ├── config.py
+│   ├── init_db.py
+│   ├── requirements.txt
+│   ├── database.db
+│   ├── routes/
+│   │   ├── auth_routes.py
+│   │   ├── absensi_routes.py
+│   │   ├── siswa_routes.py
+│   │   └── laporan_routes.py
+│   ├── services/
+│   │   ├── absensi_service.py
+│   │   └── rfid_service.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── user.py
+│   │   ├── siswa.py
+│   │   ├── rfid_card.py
+│   │   └── absensi.py
+│   └── utils/
+│       ├── helpers.py
+│       └── response.py
+└── frontend/
+    ├── index.html
+    ├── package.json
+    ├── vite.config.js
+    ├── tailwind.config.js
+    ├── postcss.config.js
+    ├── nginx.conf
+    ├── Dockerfile
+    └── src/
+        ├── main.jsx
+        ├── App.jsx
+        ├── components/
+        ├── context/
+        ├── hooks/
+        ├── pages/
+        ├── routes/
+        ├── services/
+        └── styles/
+```
 
-## 🚀 Quick Start
+## Jalankan Dengan Docker (Disarankan)
 
-### Backend Setup
+Dari folder `absensi-siswa`:
+
+```bash
+docker compose up --build
+```
+
+Akses:
+- Frontend: `http://localhost:8080`
+- Backend API: `http://localhost:5000`
+
+Catatan:
+- Database SQLite disimpan di volume `backend_data`
+- `init_db.py` otomatis dijalankan jika database belum ada
+
+## Jalankan Manual (Tanpa Docker)
+
+### Backend
 ```bash
 cd backend
 python -m venv venv
 source venv/bin/activate
-
 pip install -r requirements.txt
+cp .env.example .env
 python init_db.py
 python app.py
 ```
 
-Backend running at: `http://localhost:5000`
-
-Credentials:
-- Admin: `admin` / `admin`
-- Petugas: `petugas` / `petugas`
-
-### Frontend Setup
+### Frontend
 ```bash
 cd frontend
+cp .env.example .env
 npm install
 npm run dev
 ```
 
-Frontend running at: `http://localhost:5173`
+## Kredensial Default
+- Admin: `admin` / `admin`
+- Petugas: `petugas` / `petugas`
 
-## 📊 Project Structure
+## Seed Data Siswa & UID
+- Total sample siswa: **32**
+- UID siswa 1-5:
+  - `A1B2C3D4`
+  - `E5F6G7H8`
+  - `I9J0K1L2`
+  - `M3N4O5P6`
+  - `Q7R8S9T0`
+- UID siswa 6-32 mengikuti pola: `RFID0006` s/d `RFID0032`
 
-```
-absensi-rfid/
-├── backend/
-│   ├── app.py                    # Flask app entry point
-│   ├── config.py                 # Configuration
-│   ├── init_db.py                # Database initialization
-│   ├── requirements.txt
-│   │
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── user.py               # Admin/Petugas model
-│   │   ├── siswa.py              # Student model
-│   │   ├── rfid_card.py          # RFID card model
-│   │   └── absensi.py            # Attendance record model
-│   │
-│   ├── routes/
-│   │   ├── auth_routes.py        # Login/logout endpoints
-│   │   ├── absensi_routes.py     # RFID scan & attendance
-│   │   ├── siswa_routes.py       # Student management
-│   │   └── laporan_routes.py     # Attendance reports
-│   │
-│   ├── services/
-│   │   ├── rfid_service.py       # RFID card operations
-│   │   └── absensi_service.py    # Attendance logic
-│   │
-│   └── utils/
-│       ├── response.py           # Standard JSON responses
-│       └── helpers.py            # Helper functions
-│
-├── frontend/
-│   ├── package.json
-│   ├── vite.config.js
-│   ├── tailwind.config.js
-│   │
-│   ├── public/
-│   │   └── index.html
-│   │
-│   └── src/
-│       ├── main.jsx
-│       ├── App.jsx
-│       │
-│       ├── components/
-│       │   ├── Navbar.jsx
-│       │   ├── Sidebar.jsx
-│       │   ├── Card.jsx
-│       │   ├── Table.jsx
-│       │   └── LoadingSpinner.jsx
-│       │
-│       ├── pages/
-│       │   ├── Login.jsx
-│       │   ├── Dashboard.jsx
-│       │   ├── Rekap.jsx
-│       │   ├── DataSiswa.jsx
-│       │   └── ScanRFID.jsx
-│       │
-│       ├── services/
-│       │   └── api.js
-│       │
-│       ├── hooks/
-│       │   └── useAuth.js
-│       │
-│       ├── context/
-│       │   └── AuthContext.jsx
-│       │
-│       ├── routes/
-│       │   └── AppRoutes.jsx
-│       │
-│       └── styles/
-│           └── index.css
-│
-├── docs/
-└── README.md
-```
+## Endpoint API
 
-## 🧪 Testing
-
-### Test Login
-```bash
-curl -X POST http://localhost:5000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"admin"}'
-```
-
-### Test RFID Scan (Sample UIDs)
-```bash
-curl -X POST http://localhost:5000/api/absensi/scan \
-  -H "Content-Type: application/json" \
-  -d '{"uid":"A1B2C3D4"}'
-```
-
-Available UIDs: A1B2C3D4, E5F6G7H8, I9J0K1L2, M3N4O5P6, Q7R8S9T0
-
-## 📚 Database Schema
-
-### Users
-- id, username, password (hashed), role, is_active, created_at
-
-### Siswa
-- id, nis, nama, kelas, jenis_kelamin, alamat, no_telp, status, created_at, updated_at
-
-### RFID Cards
-- id, uid (unique), siswa_id (FK), status, created_at
+### Auth
+- `GET /api/auth/captcha`
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `GET /api/auth/me`
 
 ### Absensi
-- id, siswa_id (FK), rfid_uid, waktu_masuk, waktu_keluar, status, keterangan, tanggal, created_at
+- `POST /api/absensi/scan`
+- `GET /api/absensi/today`
+- `GET /api/absensi/stats`
+- `GET /api/absensi/report`
 
-## 🔐 Security Features
+### Siswa
+- `GET /api/siswa/`
+- `GET /api/siswa/<id>`
+- `POST /api/siswa/`
+- `PUT /api/siswa/<id>`
+- `POST /api/siswa/<id>/rfid`
 
-- Password hashing dengan Werkzeug
-- Flask-Login for session management
-- Role-based access control (RBAC)
-- CORS configured for security
-- Input validation on all endpoints
+### Laporan
+- `GET /api/laporan/rekap`
+- `GET /api/laporan/export/csv`
 
-## 📦 Tech Stack
+## Skema Data Penting
 
-**Backend:**
-- Flask 2.3.3
-- Flask-Login 0.6.2
-- Flask-SQLAlchemy 3.0.3
-- Flask-SocketIO 6.5.3
+### `absensi`
+Kolom utama:
+- `id`
+- `siswa_id`
+- `nama_siswa`
+- `rfid_uid`
+- `waktu_masuk`
+- `status`
+- `tanggal`
 
-**Frontend:**
-- React 18.2.0
-- Vite 5.0.0
-- React Router 6
-- Tailwind CSS 3.3
-- Animate.css 4.1.1
+`nama_siswa` diisi saat proses scan agar nama pelaku absensi tetap tersimpan langsung di record.
 
-## 🤝 Konhibusi
+## Re-init Database
 
-Untuk menyarankan fitur atau melaporkan bug, silakan buat issue atau pull request.
+Kalau ingin reset semua data dan generate ulang 32 siswa:
 
-## 📄 License
-
-MIT License
+```bash
+cd backend
+python init_db.py
+```
