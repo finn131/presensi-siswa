@@ -1,5 +1,5 @@
 from app import create_app
-from models import db, User, Siswa, Absensi, RFIDCard
+from models import db, User, Siswa, RFIDCard
 from werkzeug.security import generate_password_hash
 
 
@@ -78,7 +78,7 @@ def init_db():
         
         db.session.add_all(students)
         db.session.commit()
-        
+
         # Register RFID cards for students
         rfid_cards = []
         for idx, siswa in enumerate(students, start=1):

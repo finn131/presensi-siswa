@@ -9,6 +9,7 @@ from routes.auth_routes import auth_bp
 from routes.absensi_routes import absensi_bp
 from routes.siswa_routes import siswa_bp
 from routes.laporan_routes import laporan_bp
+from routes.flag_routes import flag_bp
 
 
 def create_app(config_name=None):
@@ -30,6 +31,7 @@ def create_app(config_name=None):
             if 'nama_siswa' not in absensi_columns:
                 db.session.execute(text('ALTER TABLE absensi ADD COLUMN nama_siswa VARCHAR(120)'))
                 db.session.commit()
+
     
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
@@ -46,6 +48,7 @@ def create_app(config_name=None):
     app.register_blueprint(absensi_bp)
     app.register_blueprint(siswa_bp)
     app.register_blueprint(laporan_bp)
+    app.register_blueprint(flag_bp)
     
     # Root route
     @app.route('/')

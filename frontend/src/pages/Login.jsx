@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { authAPI } from '../services/api'
+import { buildProof } from '../utils/proof'
 
 export default function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [captchaImage, setCaptchaImage] = useState('')
+  const [captchaNonce, setCaptchaNonce] = useState('')
   const [captchaAnswer, setCaptchaAnswer] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -20,10 +22,12 @@ export default function Login() {
       const response = await authAPI.getCaptcha()
       if (response.data?.success) {
         setCaptchaImage(response.data.data.image)
+        setCaptchaNonce(response.data.data.nonce || '')
       }
       setCaptchaAnswer('')
     } catch (_) {
       setCaptchaImage('')
+      setCaptchaNonce('')
     } finally {
       setCaptchaLoading(false)
     }
@@ -38,7 +42,14 @@ export default function Login() {
     setError('')
     setLoading(true)
 
-    const result = await login(username, password, captchaAnswer)
+    if (!captchaNonce) {
+      setError('Captcha belum valid. Muat ulang captcha terlebih dahulu')
+      setLoading(false)
+      return
+    }
+
+    const proof = await buildProof(username, captchaNonce)
+    const result = await login(username, password, captchaAnswer, proof)
 
     if (result.success) {
       navigate('/dashboard')

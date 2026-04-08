@@ -44,6 +44,7 @@ export default function Dashboard() {
     }
   }
 
+
   if (loading || !stats) {
     return <LoadingSpinner />
   }
@@ -83,6 +84,7 @@ export default function Dashboard() {
         </div>
         <Table headers={['Waktu', 'NIS', 'Nama', 'Kelas', 'Status']} rows={recentRows} loading={loading} />
       </div>
+
     </div>
   )
 }

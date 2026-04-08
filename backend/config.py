@@ -7,6 +7,9 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config:
     """Base configuration"""
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+    SERVER_SECRET = os.environ.get('SERVER_SECRET', 'dev-server-secret-change-in-production')
+    CLIENT_PROOF_KEY = os.environ.get('CLIENT_PROOF_KEY', 'nx_gate_42')
+    FLAG_VALUE = os.environ.get('FLAG_VALUE', 'Nyxx{cl13n7_s1d3_crypt0_1s_n0t_s3cur3}')
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         'DATABASE_URL',
         'sqlite:///' + os.path.join(basedir, 'database.db')

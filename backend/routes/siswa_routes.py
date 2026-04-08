@@ -11,16 +11,16 @@ siswa_bp = Blueprint('siswa', __name__, url_prefix='/api/siswa')
 @login_required
 def get_students():
     """Get all students"""
-    status = request.args.get('status', 'aktif')
+    status = 'aktif'
     kelas = request.args.get('kelas')
     
     query = Siswa.query
     
-    if status:
-        query = query.filter_by(status=status)
-    
     if kelas:
-        query = query.filter_by(kelas=kelas)
+        query = query.filter_by(status=status, kelas=kelas)
+    else:
+        # Normal behavior: only return active students
+        query = query.filter_by(status=status)
     
     students = query.order_by(Siswa.nama).all()
     

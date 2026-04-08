@@ -1,6 +1,9 @@
 import base64
+import hashlib
 import random
-from flask import Blueprint, request, session
+import secrets
+import time
+from flask import Blueprint, request, session, current_app
 from flask_login import login_user, logout_user, current_user
 from werkzeug.security import check_password_hash
 from models import User
@@ -72,10 +75,13 @@ def login():
     username = data.get('username')
     password = data.get('password')
     captcha_answer = str(data.get('captcha_answer', '')).strip()
+    proof = str(data.get('proof', '')).strip()
     expected_captcha = session.get('captcha_answer')
+    login_nonce = session.get('login_nonce')
+    nonce_ts = session.get('login_nonce_ts')
     
-    if not username or not password or not captcha_answer:
-        return error_response('Username, password, dan captcha diperlukan', 400)
+    if not username or not password or not captcha_answer or not proof:
+        return error_response('Username, password, captcha, dan proof diperlukan', 400)
 
     if expected_captcha is None:
         return error_response('Captcha belum dibuat. Muat ulang captcha gambar terlebih dahulu', 400)
@@ -84,6 +90,23 @@ def login():
     if captcha_answer.upper() != str(expected_captcha).upper():
         session.pop('captcha_answer', None)
         return error_response('Captcha salah', 400)
+
+    if not login_nonce or not nonce_ts:
+        return error_response('Nonce login tidak valid. Muat ulang captcha terlebih dahulu', 400)
+
+    if time.time() - float(nonce_ts) > 120:
+        session.pop('login_nonce', None)
+        session.pop('login_nonce_ts', None)
+        return error_response('Nonce login kedaluwarsa. Muat ulang captcha terlebih dahulu', 400)
+
+    expected_proof = hashlib.sha256(
+        f'{login_nonce}:{username}:{current_app.config["CLIENT_PROOF_KEY"]}'.encode('utf-8')
+    ).hexdigest()
+
+    if proof != expected_proof:
+        session.pop('login_nonce', None)
+        session.pop('login_nonce_ts', None)
+        return error_response('Proof login tidak valid', 401)
     
     user = User.query.filter_by(username=username).first()
     
@@ -94,7 +117,10 @@ def login():
         return error_response('User tidak aktif', 403)
     
     session.pop('captcha_answer', None)
+    session.pop('login_nonce', None)
+    session.pop('login_nonce_ts', None)
     login_user(user)
+    session['proof_ok'] = True
     
     return success_response({
         'user': {
@@ -110,12 +136,14 @@ def get_captcha():
     """Generate image captcha in SVG format"""
     captcha_code = _generate_captcha_code()
     session['captcha_answer'] = captcha_code
+    session['login_nonce'] = secrets.token_hex(8)
+    session['login_nonce_ts'] = time.time()
     svg = _generate_captcha_svg(captcha_code)
     encoded_svg = base64.b64encode(svg.encode('utf-8')).decode('utf-8')
     image_data = f'data:image/svg+xml;base64,{encoded_svg}'
 
     return success_response(
-        {'image': image_data},
+        {'image': image_data, 'nonce': session['login_nonce']},
         'Captcha berhasil dibuat',
         200
     )
@@ -125,6 +153,7 @@ def get_captcha():
 def logout():
     """Logout endpoint"""
     logout_user()
+    session.pop('proof_ok', None)
     return success_response(message='Logout berhasil', code=200)
 
 

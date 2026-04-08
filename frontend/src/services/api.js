@@ -12,8 +12,8 @@ const api = axios.create({
 
 // Auth endpoints
 export const authAPI = {
-  login: (username, password, captchaAnswer) =>
-    api.post('/auth/login', { username, password, captcha_answer: captchaAnswer }),
+  login: (username, password, captchaAnswer, proof) =>
+    api.post('/auth/login', { username, password, captcha_answer: captchaAnswer, proof }),
   getCaptcha: () => api.get('/auth/captcha'),
   logout: () => api.post('/auth/logout'),
   getCurrentUser: () => api.get('/auth/me'),
@@ -50,6 +50,10 @@ export const laporanAPI = {
     api.get('/laporan/rekap', { params: { start_date, end_date, kelas } }),
   exportCSV: (start_date, end_date) => 
     api.get('/laporan/export/csv', { params: { start_date, end_date }, responseType: 'blob' }),
+}
+
+export const flagAPI = {
+  get: () => api.get('/flag/'),
 }
 
 export default api
